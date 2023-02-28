@@ -18,6 +18,7 @@ set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 find_package(imgui REQUIRED)
 
+
 ## Create main executable
 add_executable(ImGui-GLFW-OpenGL3)
 
@@ -40,6 +41,6 @@ ENDIF()
 target_sources(
 	ImGui-GLFW-OpenGL3
 	PRIVATE
-        ${CMAKE_SOURCE_DIR}/main.cpp
+        ${CMAKE_SOURCE_DIR}/source/rendering/main.cpp
 )
 
