@@ -11,6 +11,8 @@ project (
 
 ## Find dependencies
 find_package(glfw3 REQUIRED)
+find_package(glad REQUIRED)
+find_package(glm REQUIRED)
 
 # Use  cmake -S . -B build/ -DOpenGL_GL_PREFERENCE=GLVND
 # to skip legacy OpenGL library
@@ -32,9 +34,9 @@ target_include_directories(
 )
 
 IF (WIN32)
-    target_link_libraries(ImGui-GLFW-OpenGL3 PRIVATE glfw opengl32.lib imgui::imgui)
+     target_link_libraries(ImGui-GLFW-OpenGL3 PRIVATE glfw glad::glad opengl32.lib glm::glm imgui::imgui)
 ELSE()
-	target_link_libraries(ImGui-GLFW-OpenGL3 PRIVATE glfw OpenGL imgui::imgui)
+	target_link_libraries(ImGui-GLFW-OpenGL3 PRIVATE glfw glad::glad glm::glm OpenGL imgui::imgui)
 ENDIF()
 
 
@@ -42,5 +44,10 @@ target_sources(
 	ImGui-GLFW-OpenGL3
 	PRIVATE
         ${CMAKE_SOURCE_DIR}/source/rendering/main.cpp
+	${CMAKE_SOURCE_DIR}/source/rendering/resource_manager.cpp
+ 	${CMAKE_SOURCE_DIR}/source/rendering/texture.cpp
+  	${CMAKE_SOURCE_DIR}/source/rendering/sprite_renderer.cpp
+  	${CMAKE_SOURCE_DIR}/source/rendering/game.cpp
+  	${CMAKE_SOURCE_DIR}/source/rendering/shader_s.cpp
 )
 

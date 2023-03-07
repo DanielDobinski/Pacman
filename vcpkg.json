@@ -2,6 +2,9 @@
   "name": "imgui-glfw-opengl3",
   "version-string": "0.1.0",
   "dependencies": [
+  	"glad",
+	"glfw3",
+	"glm",
     {
       "name": "imgui",
       "platform": "windows",
