@@ -19,6 +19,7 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 Game Breakout(SCR_WIDTH, SCR_HEIGHT);
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 static void glfw_error_callback(int error, const char* description)
@@ -48,6 +49,7 @@ int main(int, char**)
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetKeyCallback(window, key_callback);
     glfwSwapInterval(1); // Enable vsync
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -82,16 +84,6 @@ int main(int, char**)
     //main loop
     while (!glfwWindowShouldClose(window))
     {
-        float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-        glfwPollEvents();
-        processInput(window);
-        Breakout.ProcessInput(deltaTime);
-        Breakout.Update(deltaTime);
-
-        
-
          /***********IMGUI***********************/
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
@@ -127,6 +119,13 @@ int main(int, char**)
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         /***********IMGUI***********************/
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+        glfwPollEvents();
+        processInput(window);
+        Breakout.ProcessInput(deltaTime);
+        Breakout.Update(deltaTime);
         //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         //glClear(GL_COLOR_BUFFER_BIT);
         Breakout.Render();
@@ -162,4 +161,18 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+{
+    // when a user presses the escape key, we set the WindowShouldClose property to true, closing the application
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+    if (key >= 0 && key < 1024)
+    {
+        if (action == GLFW_PRESS)
+            Breakout.Keys[key] = true;
+        else if (action == GLFW_RELEASE)
+            Breakout.Keys[key] = false;
+    }
 }

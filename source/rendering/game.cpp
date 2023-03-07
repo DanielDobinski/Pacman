@@ -9,10 +9,13 @@
 #include "../../include/rendering/game.h"
 #include "../../include/rendering/resource_manager.h"
 #include "../../include/rendering/sprite_renderer.h"
+#include "../../include/rendering/game_object.h"
+#include "../../include/rendering/game_level.h"
 
 
 // Game-related State data
 SpriteRenderer  *Renderer;
+GameObject      *Player;
 
 
 Game::Game(unsigned int width, unsigned int height) 
@@ -24,6 +27,7 @@ Game::Game(unsigned int width, unsigned int height)
 Game::~Game()
 {
     delete Renderer;
+    delete Player;
 }
 
 void Game::Init()
@@ -35,21 +39,56 @@ void Game::Init()
         static_cast<float>(this->Height), 0.0f, -1.0f, 1.0f);
     ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
     ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
+    //set render
     Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
+    //load textures
     ResourceManager::LoadTexture("../../container.jpg", false, "face");
+    ResourceManager::LoadTexture("../../pacman.jpg", false, "pacman");
+    GameLevel one; one.Load("../../one.lvl", this->Width, this->Height / 2);
+    this->Levels.push_back(one);
+    this->Level = 0;
+    //game objects
+    glm::vec2 playerPos = glm::vec2(this->Width / 2.0f - PLAYER_SIZE.x / 2.0f, this->Height / 2 - PLAYER_SIZE.y / 2);
+    Player = new GameObject(playerPos, PLAYER_SIZE, ResourceManager::GetTexture("pacman"));
 }
 
 void Game::Update(float dt)
 {
-    
+     
 }
 
 void Game::ProcessInput(float dt)
 {
-   
+   if (this->State == GAME_ACTIVE)
+    {
+        float velocity = PLAYER_VELOCITY * dt;
+        // move playerboard
+        if (this->Keys[GLFW_KEY_A])
+        {
+            if (Player->Position.x >= 0.0f)
+                Player->Position.x -= velocity;
+        }
+        if (this->Keys[GLFW_KEY_D])
+        {
+            if (Player->Position.x <= this->Width - Player->Size.x)
+                Player->Position.x +=velocity;
+        }
+        if (this->Keys[GLFW_KEY_S])
+        {
+            if (Player->Position.y <= this->Height - Player->Size.y)
+                Player->Position.y += velocity;
+        }
+         if (this->Keys[GLFW_KEY_W])
+        {
+            if (Player->Position.y >= 0.0f)
+                Player->Position.y -= velocity;
+        }
+    }
 }
 
 void Game::Render()
 {
     Renderer->DrawSprite(ResourceManager::GetTexture("face"), glm::vec2(200.0f, 200.0f), glm::vec2(300.0f, 400.0f), 10.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+    this->Levels[this->Level].Draw(*Renderer);
+    Player->Draw(*Renderer);
 }

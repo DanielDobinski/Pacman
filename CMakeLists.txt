@@ -49,5 +49,7 @@ target_sources(
   	${CMAKE_SOURCE_DIR}/source/rendering/sprite_renderer.cpp
   	${CMAKE_SOURCE_DIR}/source/rendering/game.cpp
   	${CMAKE_SOURCE_DIR}/source/rendering/shader_s.cpp
+	${CMAKE_SOURCE_DIR}/source/rendering/game_object.cpp
+	${CMAKE_SOURCE_DIR}/source/rendering/game_level.cpp
 )
 
