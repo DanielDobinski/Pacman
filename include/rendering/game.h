@@ -46,6 +46,10 @@ public:
     void ProcessInput(float dt);
     void Update(float dt);
     void Render();
+    GameLevel getGameLevel(unsigned int l)
+    {
+        return Levels[l];
+    }
 };
 
 #endif

@@ -10,10 +10,11 @@
 
 #include <fstream>
 #include <sstream>
-
+#include <iostream>
 
 void GameLevel::Load(const char *file, unsigned int levelWidth, unsigned int levelHeight)
 {
+
     // clear old data
     this->Bricks.clear();
     // load from file
@@ -29,11 +30,17 @@ void GameLevel::Load(const char *file, unsigned int levelWidth, unsigned int lev
             std::istringstream sstream(line);
             std::vector<unsigned int> row;
             while (sstream >> tileCode) // read each word separated by spaces
+            {
                 row.push_back(tileCode);
+            }
             tileData.push_back(row);
         }
         if (tileData.size() > 0)
             this->init(tileData, levelWidth, levelHeight);
+    }
+    else
+    {
+        std::cout << "Level file did not load" << std::endl;
     }
 }
 

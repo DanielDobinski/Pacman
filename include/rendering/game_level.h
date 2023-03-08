@@ -33,6 +33,11 @@ public:
     void Draw(SpriteRenderer &renderer);
     // check if the level is completed (all non-solid tiles are destroyed)
     bool IsCompleted();
+
+    std::vector<GameObject> getGameObject()
+    {
+        return Bricks;
+    }
 private:
     // initialize level from tile data
     void init(std::vector<std::vector<unsigned int>> tileData, unsigned int levelWidth, unsigned int levelHeight);

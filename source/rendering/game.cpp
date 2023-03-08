@@ -43,13 +43,26 @@ void Game::Init()
     Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
     //load textures
     ResourceManager::LoadTexture("../../container.jpg", false, "face");
+    ResourceManager::LoadTexture("../../block.png", false, "block");
+    ResourceManager::LoadTexture("../../block_solid.png", false, "block_solid");
     ResourceManager::LoadTexture("../../pacman.jpg", false, "pacman");
-    GameLevel one; one.Load("../../one.lvl", this->Width, this->Height / 2);
+    GameLevel one; one.Load("../../resources/one.lvl", this->Width, this->Height / 2);
     this->Levels.push_back(one);
     this->Level = 0;
     //game objects
     glm::vec2 playerPos = glm::vec2(this->Width / 2.0f - PLAYER_SIZE.x / 2.0f, this->Height / 2 - PLAYER_SIZE.y / 2);
     Player = new GameObject(playerPos, PLAYER_SIZE, ResourceManager::GetTexture("pacman"));
+    //DEBUG
+    GameObject                 tempObject;
+    std::vector<GameObject>    tempObjects;
+    GameLevel                  tempLevel;
+    tempLevel = this->getGameLevel(0);
+    tempObjects = tempLevel.getGameObject();
+    tempObject = tempObjects[3];
+
+    std::cout<< tempObject.Position.x << std::endl;
+    std::cout<< tempObject.Position.y << std::endl;
+    //std::cout<< Player->Position.y << std::endl;
 }
 
 void Game::Update(float dt)
@@ -88,7 +101,12 @@ void Game::ProcessInput(float dt)
 
 void Game::Render()
 {
-    Renderer->DrawSprite(ResourceManager::GetTexture("face"), glm::vec2(200.0f, 200.0f), glm::vec2(300.0f, 400.0f), 10.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-    this->Levels[this->Level].Draw(*Renderer);
-    Player->Draw(*Renderer);
+    if(this->State == GAME_ACTIVE)
+    {
+        Renderer->DrawSprite(ResourceManager::GetTexture("face"), glm::vec2(200.0f, 200.0f), glm::vec2(300.0f, 400.0f), 10.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        this->Levels[this->Level].Draw(*Renderer);
+        Player->Draw(*Renderer);
+        //std::cout<< Player->Position.x << std::endl;
+        //std::cout<< Player->Position.y << std::endl;
+    }
 }
