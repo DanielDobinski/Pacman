@@ -12,8 +12,9 @@
 GameObject::GameObject() 
     : Position(0.0f, 0.0f), Size(1.0f, 1.0f), Velocity(0.0f), Color(1.0f), Rotation(0.0f), Sprite(), IsSolid(false), Destroyed(false) { }
 
-GameObject::GameObject(glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec3 color, glm::vec2 velocity, std::vector<bool> CurrentCollision) 
-    : Position(pos), Size(size), Velocity(velocity), Color(color), Rotation(0.0f), Sprite(sprite), IsSolid(false), Destroyed(false), CurrentCollision({false, false, false, false}) { }
+GameObject::GameObject(glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec3 color, glm::vec2 velocity, std::vector<bool> CurrentCollision, int direction, int moveCount) 
+    : Position(pos), Size(size), Velocity(velocity), Color(color), Rotation(0.0f), Sprite(sprite), IsSolid(false), Destroyed(false),
+     CurrentCollision({false, false, false, false}), direction(direction), moveCount(moveCount) { }
 
 void GameObject::Draw(SpriteRenderer &renderer)
 {
@@ -88,8 +89,21 @@ bool CheckCollisionDown(GameObject &one, GameObject &two)
     return collisionY;
 }  
 
+void GameObject::MoveRandom(float velocity)
+{
+    if(this->moveCount == 300)
+        this->moveCount = 0;
+    if(this->moveCount == 0)
+        {this->direction = rand() % 4;}
 
-
-
-
-
+    if (((this->CurrentCollision)[1] == 0) && (this->direction == 0))
+            {this->Position.x -= velocity;this->moveCount++;}
+    else if (((this->CurrentCollision)[0] == 0) && (this->direction == 1))
+            {this->Position.x +=velocity;this->moveCount++;}
+    else if (((this->CurrentCollision)[3] == 0) && (this->direction == 2))
+            {this->Position.y += velocity;this->moveCount++;}
+    else if (((this->CurrentCollision)[2] == 0) && (this->direction == 3))
+            {this->Position.y -= velocity;this->moveCount++;}
+    else
+        {this->direction = rand() % 4;MoveRandom(velocity);}
+}

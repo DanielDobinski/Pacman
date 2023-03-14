@@ -29,15 +29,19 @@ public:
     float        Rotation;
     bool         IsSolid;
     bool         Destroyed;
+    int          direction;
+    int          moveCount;
     std::vector<bool> CurrentCollision; //1 - right; 2 - left; 3 - up; 4 - down
     // render state
     Texture2D   Sprite; 
     // constructor(s)
     GameObject();
     GameObject(glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec3 color = glm::vec3(1.0f),
-        glm::vec2 velocity = glm::vec2(0.0f, 0.0f), std::vector<bool> CurrentCollision = {false, false, false, false});
+        glm::vec2 velocity = glm::vec2(0.0f, 0.0f), std::vector<bool> CurrentCollision = {false, false, false, false},
+        int direction = 0, int moveCount = 0);
     // draw sprite
     virtual void Draw(SpriteRenderer &renderer);
+    void MoveRandom(float velocity);
 };
 bool CheckCollision(GameObject &one, GameObject &two); // AABB - AABB collision
 bool CheckCollisionUp(GameObject &one, GameObject &two); 

@@ -11,12 +11,16 @@
 #include "../../include/rendering/sprite_renderer.h"
 #include "../../include/rendering/game_object.h"
 #include "../../include/rendering/game_level.h"
-
+#include <vector>
 
 // Game-related State data
-SpriteRenderer  *Renderer;
-GameObject      *Player;
-GameObject      *Ghost_1;
+SpriteRenderer              *Renderer;
+GameObject                  *Player;
+GameObject                  *Ghost_1;     
+GameObject                  *Ghost_2; 
+GameObject                  *Ghost_3; 
+std::vector<GameObject*>     Ghosts;
+static int GameOverFlag = 0;
 
 
 Game::Game(unsigned int width, unsigned int height) 
@@ -47,16 +51,25 @@ void Game::Init()
     ResourceManager::LoadTexture("../../block.png", false, "block");
     ResourceManager::LoadTexture("../../block_solid.png", false, "block_solid");
     ResourceManager::LoadTexture("../../pacman.png", false, "pacman");
-    ResourceManager::LoadTexture("../../ghost_red.jpg", false, "ghost");
+    ResourceManager::LoadTexture("../../ghost_red.jpg", false, "ghost_red");
+    ResourceManager::LoadTexture("../../ghost_blue.png", false, "ghost_blue");
+    ResourceManager::LoadTexture("../../ghost_yellow.png", false, "ghost_yellow");
     ResourceManager::LoadTexture("../../coke.jpg", false, "coke");
     GameLevel one; one.Load("../../resources/one.lvl", this->Width, this->Height);
     this->Levels.push_back(one);
     this->Level = 0;
     //game objects
     glm::vec2 playerPos = glm::vec2(this->Width / 2.0f - PLAYER_SIZE.x / 2.0f, this->Height / 2.0f - PLAYER_SIZE.y / 2.0f);
-    glm::vec2 ghostPos = glm::vec2(this->Width / 4.0f - PLAYER_SIZE.x / 4.0f, this->Height / 4.0f - PLAYER_SIZE.y / 4.0f);
+    glm::vec2 ghostPos1 = glm::vec2(this->Width / 3.0f - PLAYER_SIZE.x / 3.0f, this->Height / 3.0f - PLAYER_SIZE.y / 3.0f);
+    glm::vec2 ghostPos2 = glm::vec2(this->Width / 3.0f - PLAYER_SIZE.x / 3.0f, this->Height / 3.0f - PLAYER_SIZE.y / 3.0f);
+    glm::vec2 ghostPos3 = glm::vec2(this->Width / 3.0f - PLAYER_SIZE.x / 2.0f, this->Height / 5.0f - PLAYER_SIZE.y / 2.0f);
     Player = new GameObject(playerPos, PLAYER_SIZE, ResourceManager::GetTexture("pacman"), glm::vec3(1.0f), glm::vec2(0.0f, 0.0f));
-    Ghost_1 = new GameObject(ghostPos, PLAYER_SIZE, ResourceManager::GetTexture("ghost"), glm::vec3(1.0f), glm::vec2(0.0f, 0.0f));
+    Ghost_1 = new GameObject(ghostPos1, PLAYER_SIZE, ResourceManager::GetTexture("ghost_red"), glm::vec3(1.0f), glm::vec2(0.0f, 0.0f));
+    Ghost_2 = new GameObject(ghostPos2, PLAYER_SIZE, ResourceManager::GetTexture("ghost_red"), glm::vec3(1.0f), glm::vec2(0.0f, 0.0f));
+    Ghost_3 = new GameObject(ghostPos3, PLAYER_SIZE, ResourceManager::GetTexture("ghost_yellow"), glm::vec3(1.0f), glm::vec2(0.0f, 0.0f));
+    Ghosts.push_back(Ghost_1);
+    Ghosts.push_back(Ghost_2);
+    Ghosts.push_back(Ghost_3);
     //DEBUG
     GameObject                 tempObject;
     std::vector<GameObject>    tempObjects;
@@ -72,8 +85,19 @@ void Game::Init()
 
 void Game::Update(float dt)
 {
-    //delete the bricks when you make a collision
+    float velocity = GHOST_VELOCITY * dt;
+    //delete the Food when you make a collision
     this->DoCollisions();
+    CheckMoveColissions(Ghosts[0]);
+    CheckMoveColissions(Ghosts[1]);
+    CheckMoveColissions(Ghosts[2]);
+    
+    if (CheckCollision(*Player, *(Ghosts[0])) || CheckCollision(*Player, *(Ghosts[1])) || CheckCollision(*Player, *(Ghosts[2])))
+    { GameOverFlag = 1;}
+
+    (Ghosts[0])->MoveRandom(velocity);
+    (Ghosts[1])->MoveRandom(velocity);
+    (Ghosts[2])->MoveRandom(velocity);
 }
 
 void Game::DoCollisions()
@@ -90,30 +114,29 @@ void Game::DoCollisions()
         }
     }
 }  
-
-void Game::CheckMoveColissions()
+void Game::CheckMoveColissions(GameObject * object)
 {
     for (int i = 0; i < 4; i++)
     {
-        (Player->CurrentCollision)[i] = false;
+        (object->CurrentCollision)[i] = false;
     }
     for (GameObject &box : this->Levels[this->Level].Bricks)
         {
-            if (CheckCollisionRight(*Player, box))
+            if (CheckCollisionRight(*object, box))
             {
-                (Player->CurrentCollision)[0] = true;
+                (object->CurrentCollision)[0] = true;
             }
-            if (CheckCollisionLeft(*Player, box))
+            if (CheckCollisionLeft(*object, box))
             {
-                (Player->CurrentCollision)[1] = true;
+                (object->CurrentCollision)[1] = true;
             }
-            if (CheckCollisionUp(*Player, box))
+            if (CheckCollisionUp(*object, box))
             {
-                (Player->CurrentCollision)[2] = true;
+                (object->CurrentCollision)[2] = true;
             }
-            if (CheckCollisionDown(*Player, box))
+            if (CheckCollisionDown(*object, box))
             {
-                (Player->CurrentCollision)[3] = true;
+                (object->CurrentCollision)[3] = true;
             }
         }
 }
@@ -123,27 +146,31 @@ void Game::ProcessInput(float dt)
    if (this->State == GAME_ACTIVE)
    {
         //TODO: convert to a function
-        CheckMoveColissions();
+        CheckMoveColissions(Player);
 
         float velocity = PLAYER_VELOCITY * dt;
         // move playerboard
         if (this->Keys[GLFW_KEY_A])
         {
+            Player->Rotation = 0.0f;
             if ((Player->Position.x) >= 0.0f && ((Player->CurrentCollision)[1] == 0))
                 Player->Position.x -= velocity;
         }
         if (this->Keys[GLFW_KEY_D])
         {
+            Player->Rotation = 0.0f;
             if ((Player->Position.x <= this->Width - Player->Size.x) && ((Player->CurrentCollision)[0] == 0)) 
                 Player->Position.x +=velocity;
         }
         if (this->Keys[GLFW_KEY_S])
         {
+            Player->Rotation = 90.0f;
             if ((Player->Position.y <= this->Height - Player->Size.y) && ((Player->CurrentCollision)[3] == 0))
                 Player->Position.y += velocity;
         }
          if (this->Keys[GLFW_KEY_W])
         {
+            Player->Rotation = 270.0f;
             if ((Player->Position.y >= 0.0f) && ((Player->CurrentCollision)[2] == 0))
                 Player->Position.y -= velocity;
         }
@@ -154,12 +181,17 @@ void Game::Render()
 {
     if(this->State == GAME_ACTIVE)
     {
-        Renderer->DrawSprite(ResourceManager::GetTexture("background"), glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height), 0.0f, glm::vec3(1.0f));
+        if(GameOverFlag == 1)
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("background"), glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height), 0.0f, glm::vec3(1.0f));
+        }
         //Renderer->DrawSprite(ResourceManager::GetTexture("face"), glm::vec2(200.0f, 200.0f), glm::vec2(300.0f, 400.0f), 10.0f, glm::vec3(0.0f, 1.0f, 0.0f));
         this->Levels[this->Level].Draw(*Renderer);
         //this->Levels[this->Level].Draw(*Renderer);
         Player->Draw(*Renderer);
-        Ghost_1->Draw(*Renderer);
+        Ghosts[0]->Draw(*Renderer);
+        Ghosts[1]->Draw(*Renderer);
+        Ghosts[2]->Draw(*Renderer);
         //std::cout<< Player->Position.x << std::endl;
         //std::cout<< Player->Position.y << std::endl;
     }

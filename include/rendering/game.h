@@ -24,6 +24,7 @@ enum GameState {
 const glm::vec2 PLAYER_SIZE(20.0f, 20.0f);
 // Initial velocity of the player paddle
 const float PLAYER_VELOCITY(300.0f);
+const float GHOST_VELOCITY(100.0f);
 
 // Game holds all game-related state and functionality.
 // Combines all game-related data into a single class for
@@ -50,7 +51,7 @@ public:
     {
         return Levels[l];
     }
-    void CheckMoveColissions();
+    void CheckMoveColissions(GameObject * object);
     void DoCollisions();
 };
 
