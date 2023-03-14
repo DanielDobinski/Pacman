@@ -88,8 +88,21 @@ bool CheckCollisionDown(GameObject &one, GameObject &two)
     return collisionY;
 }  
 
-
-
-
-
-
+void GameObject::MoveRandom(float velocity)
+{
+    //TODO - make it more random
+    static int randNumber = 0;
+    static int count = 0;
+    if(count == 0)
+        {randNumber = rand() % 4;}
+    if(count == 1)
+        count = 0;
+    if (((this->CurrentCollision)[1] == 0) && (randNumber == 0))
+            {this->Position.x -= velocity;count++;}
+    else if (((this->CurrentCollision)[0] == 0) && (randNumber == 1))
+            {this->Position.x +=velocity;count++;}
+    else if (((this->CurrentCollision)[3] == 0) && (randNumber == 2))
+            {this->Position.y += velocity;count++;}
+    else if (((this->CurrentCollision)[2] == 0) && (randNumber == 3))
+            {this->Position.y -= velocity;count++;}
+}

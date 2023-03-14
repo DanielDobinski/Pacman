@@ -38,6 +38,7 @@ public:
         glm::vec2 velocity = glm::vec2(0.0f, 0.0f), std::vector<bool> CurrentCollision = {false, false, false, false});
     // draw sprite
     virtual void Draw(SpriteRenderer &renderer);
+    void MoveRandom(float velocity);
 };
 bool CheckCollision(GameObject &one, GameObject &two); // AABB - AABB collision
 bool CheckCollisionUp(GameObject &one, GameObject &two); 
