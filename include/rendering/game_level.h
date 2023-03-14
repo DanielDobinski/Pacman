@@ -25,6 +25,7 @@ class GameLevel
 public:
     // level state
     std::vector<GameObject> Bricks;
+    std::vector<GameObject> Food;
     // constructor
     GameLevel() { }
     // loads level from file

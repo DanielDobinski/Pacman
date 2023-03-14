@@ -49,6 +49,9 @@ void GameLevel::Draw(SpriteRenderer &renderer)
     for (GameObject &tile : this->Bricks)
         if (!tile.Destroyed)
             tile.Draw(renderer);
+    for (GameObject &tile : this->Food)
+        if (!tile.Destroyed)
+            tile.Draw(renderer);
 }
 
 bool GameLevel::IsCompleted()
@@ -62,24 +65,27 @@ bool GameLevel::IsCompleted()
 void GameLevel::init(std::vector<std::vector<unsigned int>> tileData, unsigned int levelWidth, unsigned int levelHeight)
 {
     // calculate dimensions
-    unsigned int height = tileData.size();
-    unsigned int width = tileData[0].size(); // note we can index vector at [0] since this function is only called if height > 0
-    float unit_width = levelWidth / static_cast<float>(width), unit_height = levelHeight / height; 
+    unsigned int height = static_cast<unsigned int>(tileData.size());
+    unsigned int width = static_cast<unsigned int>(tileData[0].size()); // note we can index vector at [0] since this function is only called if height > 0
+    float unit_width = levelWidth / static_cast<float>(width);
+    float unit_height = levelHeight / static_cast<float>(height); 
     // initialize level tiles based on tileData		
     for (unsigned int y = 0; y < height; ++y)
     {
         for (unsigned int x = 0; x < width; ++x)
         {
+            float sizeFood = 2.5f; //Food smaller than bricks ratio
             // check block type from level data (2D level array)
             if (tileData[y][x] == 1) // solid
             {
                 glm::vec2 pos(unit_width * x, unit_height * y);
                 glm::vec2 size(unit_width, unit_height);
-                GameObject obj(pos, size, ResourceManager::GetTexture("block_solid"), glm::vec3(0.8f, 0.8f, 0.7f));
-                obj.IsSolid = true;
-                this->Bricks.push_back(obj);
+                glm::vec2 posFood(unit_width * x + unit_width / sizeFood, unit_height * y + unit_width / sizeFood);
+                glm::vec2 sizeFood(unit_width / sizeFood, unit_height / sizeFood);
+                GameObject obj(posFood, sizeFood, ResourceManager::GetTexture("coke"));
+                this->Food.push_back(obj);
             }
-            else if (tileData[y][x] > 1)	// non-solid; now determine its color based on level data
+            if (tileData[y][x] > 1)	// non-solid; now determine its color based on level data
             {
                 glm::vec3 color = glm::vec3(1.0f); // original: white
                 if (tileData[y][x] == 2)

@@ -19,7 +19,7 @@ SpriteRenderer::~SpriteRenderer()
 {
     glDeleteVertexArrays(1, &this->quadVAO);
 }
-void  SpriteRenderer::UseShader()
+void  SpriteRenderer::UseShader() 
 {
     this->shader.Use();
 }
