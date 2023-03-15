@@ -17,6 +17,7 @@ void GameLevel::Load(const char *file, unsigned int levelWidth, unsigned int lev
 
     // clear old data
     this->Bricks.clear();
+    this->Food.clear();
     // load from file
     unsigned int tileCode;
     GameLevel level;

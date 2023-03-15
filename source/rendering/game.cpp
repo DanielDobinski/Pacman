@@ -21,8 +21,16 @@ GameObject                  *Ghost_2;
 GameObject                  *Ghost_3; 
 std::vector<GameObject*>     Ghosts;
 static int GameOverFlag = 0;
+static int WinFlag = 0;
 
-
+int getGameOver(void)
+{
+    return GameOverFlag;
+}
+int getWin(void)
+{
+    return WinFlag;
+}
 Game::Game(unsigned int width, unsigned int height) 
     : State(GAME_ACTIVE), Keys(), Width(width), Height(height)
 { 
@@ -77,7 +85,6 @@ void Game::Init()
     tempLevel = this->getGameLevel(0);
     tempObjects = tempLevel.getGameObject();
     tempObject = tempObjects[3];
-
     std::cout<< tempObject.Position.x << std::endl;
     std::cout<< tempObject.Position.y << std::endl;
     //std::cout<< Player->Position.y << std::endl;
@@ -98,6 +105,12 @@ void Game::Update(float dt)
     (Ghosts[0])->MoveRandom(velocity);
     (Ghosts[1])->MoveRandom(velocity);
     (Ghosts[2])->MoveRandom(velocity);
+    this->Food = (this->getGameLevel(0)).getRemainingFood();
+    std::cout<< this-> Food <<  std::endl;
+    if(Food == 0)
+    {
+        WinFlag = 1;
+    }
 }
 
 void Game::DoCollisions()

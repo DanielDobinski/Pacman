@@ -19,7 +19,7 @@ find_package(glm REQUIRED)
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 find_package(imgui REQUIRED)
-
+find_package(freetype REQUIRED)
 
 ## Create main executable
 add_executable(ImGui-GLFW-OpenGL3)
@@ -34,16 +34,16 @@ target_include_directories(
 )
 
 IF (WIN32)
-     target_link_libraries(ImGui-GLFW-OpenGL3 PRIVATE glfw glad::glad opengl32.lib glm::glm imgui::imgui)
+     target_link_libraries(ImGui-GLFW-OpenGL3 PRIVATE glfw glad::glad opengl32.lib glm::glm imgui::imgui Freetype::Freetype)
 ELSE()
-	target_link_libraries(ImGui-GLFW-OpenGL3 PRIVATE glfw glad::glad glm::glm OpenGL imgui::imgui)
+	target_link_libraries(ImGui-GLFW-OpenGL3 PRIVATE glfw glad::glad glm::glm OpenGL imgui::imgui Freetype::Freetype)
 ENDIF()
 
 
 target_sources(
 	ImGui-GLFW-OpenGL3
 	PRIVATE
-        ${CMAKE_SOURCE_DIR}/source/rendering/main.cpp
+     ${CMAKE_SOURCE_DIR}/source/rendering/main.cpp
 	${CMAKE_SOURCE_DIR}/source/rendering/resource_manager.cpp
  	${CMAKE_SOURCE_DIR}/source/rendering/texture.cpp
   	${CMAKE_SOURCE_DIR}/source/rendering/sprite_renderer.cpp
@@ -51,5 +51,6 @@ target_sources(
   	${CMAKE_SOURCE_DIR}/source/rendering/shader_s.cpp
 	${CMAKE_SOURCE_DIR}/source/rendering/game_object.cpp
 	${CMAKE_SOURCE_DIR}/source/rendering/game_level.cpp
+	${CMAKE_SOURCE_DIR}/source/rendering/text.cpp
 )
 

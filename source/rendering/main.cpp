@@ -6,26 +6,23 @@
 #include "imgui.h"  //included by vcpkg
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "string"
 #include <stdio.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 #include "../../include/rendering/stb_image.h"
 #include "../../include/rendering/game.h"
 #include "../../include/rendering/resource_manager.h"
+#include "../../include/rendering/shader_s.h"
+#include "../../include/rendering/text.h"
+#include "../../include/rendering/game_settings.h"
 
-// The Width of the screen
-const unsigned int SCR_WIDTH = 800;
-// The height of the screen
-const unsigned int SCR_HEIGHT = 600;
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+static void processInput(GLFWwindow *window);
+static void glfw_error_callback(int error, const char* description);
+
 Game Breakout(SCR_WIDTH, SCR_HEIGHT);
-
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window);
-static void glfw_error_callback(int error, const char* description)
-{
-    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
-}
 
 // Main code
 int main(int, char**)
@@ -58,6 +55,18 @@ int main(int, char**)
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
+
+    //TEXT DISPLAY SETTINGS
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    Shader shader = loadShaderFromFile2("../../resources/text.vs", "../../resources/text.fs", nullptr);;
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(SCR_WIDTH), 0.0f, static_cast<float>(SCR_HEIGHT));
+    shader.Use();
+    glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+    textDisplayConfig();
 
     Breakout.Init();
     // deltaTime variables
@@ -108,13 +117,16 @@ int main(int, char**)
         }
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
-
+            std::stringstream ss;
+            ss << "Food: " << (Breakout.getGameLevel(0)).getRemainingFood() << "/" << (Breakout.getGameLevel(0)).getFoodAmount();
+            std::string str = ss.str();
+            const char * c = str.c_str();
             ImGui::Begin("Pacman Menu");                          // Create a window called "Hello, world!" and append into it.
             ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
             ImGui::Checkbox("Game", &show_Game);                     // Edit bools storing our window open/close state
             ImGui::ColorEdit3("color", (float*)&clear_color); // Edit 3 floats representing a color
-            ImGui::Text("Your level");               // Display some text (you can use a format strings too)
-            ImGui::Text("Score");               // Display some text (you can use a format strings too)
+            ImGui::Text("Your level:");               // Display some text (you can use a format strings too)
+            ImGui::Text(c);               // Display some text (you can use a format strings too)
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
         }
@@ -148,6 +160,11 @@ int main(int, char**)
         //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         //glClear(GL_COLOR_BUFFER_BIT);
         Breakout.Render();
+        if (getGameOver() == 1)
+            RenderTextMain("GAME OVER");
+        if (getWin() == 1)
+            RenderTextMain("You Win");
+            
         glfwSwapBuffers(window);
     }
 #ifdef __EMSCRIPTEN__
@@ -166,15 +183,13 @@ int main(int, char**)
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window)
+static void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and 
@@ -182,7 +197,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
     // when a user presses the escape key, we set the WindowShouldClose property to true, closing the application
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -194,4 +209,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         else if (action == GLFW_RELEASE)
             Breakout.Keys[key] = false;
     }
+}
+static void glfw_error_callback(int error, const char* description)
+{
+    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }

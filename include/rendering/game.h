@@ -12,7 +12,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "../../include/rendering/game_level.h"
-
+int getGameOver(void);
+int getWin(void);
 // Represents the current state of the game
 enum GameState {
     GAME_ACTIVE,
@@ -38,6 +39,8 @@ public:
     unsigned int            Width, Height;
     std::vector<GameLevel>  Levels;
     unsigned int            Level;
+    int                     Food;
+    
     // constructor/destructor
     Game(unsigned int width, unsigned int height);
     ~Game();

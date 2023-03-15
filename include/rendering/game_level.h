@@ -36,9 +36,21 @@ public:
     bool IsCompleted();
 
     std::vector<GameObject> getGameObject()
+        {return Bricks;}
+    int getFoodAmount()
+        {return this->Food.size();}
+    int getRemainingFood()
     {
-        return Bricks;
+        int amount = 0;
+        for (GameObject &tile : this->Food)
+        {
+            if (!tile.Destroyed)
+                amount++;
+        }
+        return amount;
     }
+
+
 private:
     // initialize level from tile data
     void init(std::vector<std::vector<unsigned int>> tileData, unsigned int levelWidth, unsigned int levelHeight);

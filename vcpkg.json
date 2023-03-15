@@ -2,7 +2,8 @@
   "name": "imgui-glfw-opengl3",
   "version-string": "0.1.0",
   "dependencies": [
-  	"glad",
+  "freetype",
+  "glad",
 	"glfw3",
 	"glm",
     {
