@@ -55,14 +55,6 @@ void GameLevel::Draw(SpriteRenderer &renderer)
             tile.Draw(renderer);
 }
 
-bool GameLevel::IsCompleted()
-{
-    for (GameObject &tile : this->Bricks)
-        if (!tile.IsSolid && !tile.Destroyed)
-            return false;
-    return true;
-}
-
 void GameLevel::init(std::vector<std::vector<unsigned int>> tileData, unsigned int levelWidth, unsigned int levelHeight)
 {
     // calculate dimensions
@@ -75,7 +67,7 @@ void GameLevel::init(std::vector<std::vector<unsigned int>> tileData, unsigned i
     {
         for (unsigned int x = 0; x < width; ++x)
         {
-            float sizeFood = 2.5f; //Food smaller than bricks ratio
+            float sizeFood = 2.9f; //Food smaller than bricks ratio
             // check block type from level data (2D level array)
             if (tileData[y][x] == 1) // solid
             {
@@ -83,7 +75,7 @@ void GameLevel::init(std::vector<std::vector<unsigned int>> tileData, unsigned i
                 glm::vec2 size(unit_width, unit_height);
                 glm::vec2 posFood(unit_width * x + unit_width / sizeFood, unit_height * y + unit_width / sizeFood);
                 glm::vec2 sizeFood(unit_width / sizeFood, unit_height / sizeFood);
-                GameObject obj(posFood, sizeFood, ResourceManager::GetTexture("coke"));
+                GameObject obj(posFood, sizeFood, ResourceManager::GetTexture("food"));
                 this->Food.push_back(obj);
             }
             if (tileData[y][x] > 1)	// non-solid; now determine its color based on level data

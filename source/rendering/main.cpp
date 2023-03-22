@@ -60,14 +60,12 @@ int main(int, char**)
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
     Shader shader = loadShaderFromFile2("../../resources/text.vs", "../../resources/text.fs", nullptr);;
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(SCR_WIDTH), 0.0f, static_cast<float>(SCR_HEIGHT));
     shader.Use();
     glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
     textDisplayConfig();
-
+    /*********************************************************************************/
     Breakout.Init();
     // deltaTime variables
     // -------------------
@@ -160,9 +158,9 @@ int main(int, char**)
         //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         //glClear(GL_COLOR_BUFFER_BIT);
         Breakout.Render();
-        if (getGameOver() == 1)
+        if (Breakout.State == GAME_LOSE)
             RenderTextMain("GAME OVER");
-        if (getWin() == 1)
+        if (Breakout.State == GAME_WIN)
             RenderTextMain("You Win");
             
         glfwSwapBuffers(window);

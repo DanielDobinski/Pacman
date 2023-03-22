@@ -12,7 +12,7 @@ void RenderTextMain(std::string text)
 	RenderText(shaderText, text, SCR_WIDTH / 2.0f - 200, SCR_HEIGHT / 2.0f , 2.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
-//copy from different code section, shall be deleted later on
+//copy from different code section, shall be reorganized later on
 Shader loadShaderFromFile2(const char *vShaderFile, const char *fShaderFile, const char *gShaderFile)
 {
     // 1. retrieve the vertex/fragment source code from filePath

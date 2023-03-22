@@ -11,21 +11,15 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "../../include/rendering/game_level.h"
-int getGameOver(void);
-int getWin(void);
+#include "game_level.h"
+#include "game_settings.h"
+
 // Represents the current state of the game
 enum GameState {
     GAME_ACTIVE,
-    GAME_MENU,
+    GAME_LOSE,
     GAME_WIN
 };
-
-// Initial size of the player paddle
-const glm::vec2 PLAYER_SIZE(20.0f, 20.0f);
-// Initial velocity of the player paddle
-const float PLAYER_VELOCITY(300.0f);
-const float GHOST_VELOCITY(100.0f);
 
 // Game holds all game-related state and functionality.
 // Combines all game-related data into a single class for
@@ -50,11 +44,8 @@ public:
     void ProcessInput(float dt);
     void Update(float dt);
     void Render();
-    GameLevel getGameLevel(unsigned int l)
-    {
-        return Levels[l];
-    }
-    void CheckMoveColissions(GameObject * object);
+    GameLevel getGameLevel(unsigned int l);
+    void Game::CheckMoveColissions(MoveableObject * object);
     void DoCollisions();
 };
 

@@ -14,120 +14,105 @@
 #include <vector>
 
 // Game-related State data
-SpriteRenderer              *Renderer;
-GameObject                  *Player;
-GameObject                  *Ghost_1;     
-GameObject                  *Ghost_2; 
-GameObject                  *Ghost_3; 
-std::vector<GameObject*>     Ghosts;
-static int GameOverFlag = 0;
-static int WinFlag = 0;
-
-int getGameOver(void)
+SpriteRenderer                  *Renderer;
+MoveableObject                  *Player;
+MoveableObject                  *Ghost_1;     
+MoveableObject                  *Ghost_2; 
+MoveableObject                  *Ghost_3; 
+std::vector<MoveableObject*>     Ghosts;
+static void loadTextures()
 {
-    return GameOverFlag;
+    ResourceManager::LoadTexture("../../resources/background.jpg", false, "background");
+    ResourceManager::LoadTexture("../../resources/block.png", false, "block");
+    ResourceManager::LoadTexture("../../resources/block_solid.png", false, "block_solid");
+    ResourceManager::LoadTexture("../../resources/pacman.png", false, "pacman");
+    ResourceManager::LoadTexture("../../resources/ghost_red.jpg", false, "ghost_red");
+    ResourceManager::LoadTexture("../../resources/ghost_blue.png", false, "ghost_blue");
+    ResourceManager::LoadTexture("../../resources/ghost_yellow.png", false, "ghost_yellow");
+    ResourceManager::LoadTexture("../../resources/coke.jpg", false, "food");
 }
-int getWin(void)
+static void loadGhosts(Game * gamePtr)
 {
-    return WinFlag;
+    GameLevel one; one.Load("../../resources/one.lvl", gamePtr->Width, gamePtr->Height);
+    gamePtr->Levels.push_back(one);
+    gamePtr->Level = 0;
+    //game objects
+    glm::vec2 playerPos = glm::vec2(gamePtr->Width / 2.0f - PLAYER_SIZE.x / 2.0f, gamePtr->Height / 2.0f - PLAYER_SIZE.y / 2.0f);
+    glm::vec2 ghostPos1 = glm::vec2(gamePtr->Width / 3.0f - PLAYER_SIZE.x / 3.0f, gamePtr->Height / 3.0f - PLAYER_SIZE.y / 3.0f);
+    glm::vec2 ghostPos2 = glm::vec2(gamePtr->Width / 3.0f - PLAYER_SIZE.x / 3.0f, gamePtr->Height / 3.0f - PLAYER_SIZE.y / 3.0f);
+    glm::vec2 ghostPos3 = glm::vec2(gamePtr->Width / 3.0f - PLAYER_SIZE.x / 2.0f, gamePtr->Height / 5.0f - PLAYER_SIZE.y / 2.0f);
+    Player = new MoveableObject(playerPos, PLAYER_SIZE, ResourceManager::GetTexture("pacman"), glm::vec3(1.0f), PLAYER_VELOCITY); 
+    Ghost_1 = new MoveableObject(ghostPos1, PLAYER_SIZE, ResourceManager::GetTexture("ghost_red"), glm::vec3(1.0f), GHOST_VELOCITY);
+    Ghost_2 = new MoveableObject(ghostPos2, PLAYER_SIZE, ResourceManager::GetTexture("ghost_blue"), glm::vec3(1.0f), GHOST_VELOCITY);
+    Ghost_3 = new MoveableObject(ghostPos3, PLAYER_SIZE, ResourceManager::GetTexture("ghost_yellow"), glm::vec3(1.0f), GHOST_VELOCITY);
+    Ghosts.push_back(Ghost_1);
+    Ghosts.push_back(Ghost_2);
+    Ghosts.push_back(Ghost_3);
 }
 Game::Game(unsigned int width, unsigned int height) 
-    : State(GAME_ACTIVE), Keys(), Width(width), Height(height)
-{ 
-
-}
+    : State(GAME_ACTIVE), Keys(), Width(width), Height(height) {}
 
 Game::~Game()
 {
     delete Renderer;
     delete Player;
+    delete Ghost_1;
+    delete Ghost_2;
+    delete Ghost_3;
 }
 
 void Game::Init()
 {
-    // load shaders
     ResourceManager::LoadShader("../../include/rendering/shader.vs", "../../include/rendering/shader.fs", nullptr, "sprite");
     // configure shaders
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->Width), 
-        static_cast<float>(this->Height), 0.0f, -1.0f, 1.0f);
+    static_cast<float>(this->Height), 0.0f, -1.0f, 1.0f);
+
     ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
     ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
-    //set render
     Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
-    //load textures
-    ResourceManager::LoadTexture("../../resources/background.jpg", false, "background");
-    ResourceManager::LoadTexture("../../block.png", false, "block");
-    ResourceManager::LoadTexture("../../block_solid.png", false, "block_solid");
-    ResourceManager::LoadTexture("../../pacman.png", false, "pacman");
-    ResourceManager::LoadTexture("../../ghost_red.jpg", false, "ghost_red");
-    ResourceManager::LoadTexture("../../ghost_blue.png", false, "ghost_blue");
-    ResourceManager::LoadTexture("../../ghost_yellow.png", false, "ghost_yellow");
-    ResourceManager::LoadTexture("../../coke.jpg", false, "coke");
-    GameLevel one; one.Load("../../resources/one.lvl", this->Width, this->Height);
-    this->Levels.push_back(one);
-    this->Level = 0;
-    //game objects
-    glm::vec2 playerPos = glm::vec2(this->Width / 2.0f - PLAYER_SIZE.x / 2.0f, this->Height / 2.0f - PLAYER_SIZE.y / 2.0f);
-    glm::vec2 ghostPos1 = glm::vec2(this->Width / 3.0f - PLAYER_SIZE.x / 3.0f, this->Height / 3.0f - PLAYER_SIZE.y / 3.0f);
-    glm::vec2 ghostPos2 = glm::vec2(this->Width / 3.0f - PLAYER_SIZE.x / 3.0f, this->Height / 3.0f - PLAYER_SIZE.y / 3.0f);
-    glm::vec2 ghostPos3 = glm::vec2(this->Width / 3.0f - PLAYER_SIZE.x / 2.0f, this->Height / 5.0f - PLAYER_SIZE.y / 2.0f);
-    Player = new GameObject(playerPos, PLAYER_SIZE, ResourceManager::GetTexture("pacman"), glm::vec3(1.0f), glm::vec2(0.0f, 0.0f));
-    Ghost_1 = new GameObject(ghostPos1, PLAYER_SIZE, ResourceManager::GetTexture("ghost_red"), glm::vec3(1.0f), glm::vec2(0.0f, 0.0f));
-    Ghost_2 = new GameObject(ghostPos2, PLAYER_SIZE, ResourceManager::GetTexture("ghost_red"), glm::vec3(1.0f), glm::vec2(0.0f, 0.0f));
-    Ghost_3 = new GameObject(ghostPos3, PLAYER_SIZE, ResourceManager::GetTexture("ghost_yellow"), glm::vec3(1.0f), glm::vec2(0.0f, 0.0f));
-    Ghosts.push_back(Ghost_1);
-    Ghosts.push_back(Ghost_2);
-    Ghosts.push_back(Ghost_3);
-    //DEBUG
-    GameObject                 tempObject;
-    std::vector<GameObject>    tempObjects;
-    GameLevel                  tempLevel;
-    tempLevel = this->getGameLevel(0);
-    tempObjects = tempLevel.getGameObject();
-    tempObject = tempObjects[3];
-    std::cout<< tempObject.Position.x << std::endl;
-    std::cout<< tempObject.Position.y << std::endl;
-    //std::cout<< Player->Position.y << std::endl;
+    loadTextures();
+    loadGhosts(this);
 }
 
 void Game::Update(float dt)
 {
-    float velocity = GHOST_VELOCITY * dt;
     //delete the Food when you make a collision
     this->DoCollisions();
-    CheckMoveColissions(Ghosts[0]);
-    CheckMoveColissions(Ghosts[1]);
-    CheckMoveColissions(Ghosts[2]);
-    
-    if (CheckCollision(*Player, *(Ghosts[0])) || CheckCollision(*Player, *(Ghosts[1])) || CheckCollision(*Player, *(Ghosts[2])))
-    { GameOverFlag = 1;}
+    //update state of possibility of movement for each ghost
+    //check if player didn't touch the ghost
+    //move ghost
+    for (auto ghost : Ghosts)
+    {
+        CheckMoveColissions(ghost);
+        if(CheckCollision(*Player, *ghost))
+            this->State = GAME_LOSE;
+        ghost->MoveRandom(ghost->Velocity * dt);
+    }
 
-    (Ghosts[0])->MoveRandom(velocity);
-    (Ghosts[1])->MoveRandom(velocity);
-    (Ghosts[2])->MoveRandom(velocity);
     this->Food = (this->getGameLevel(0)).getRemainingFood();
-    std::cout<< this-> Food <<  std::endl;
     if(Food == 0)
     {
-        WinFlag = 1;
+        this->State = GAME_WIN;
     }
 }
 
 void Game::DoCollisions()
 {
-    for (GameObject &box : this->Levels[this->Level].Food)
+    //check every food for collision with the Player
+    //if it's present, then destroy the food.
+    for (auto & food : this->Levels[this->Level].Food)
     {
-        if (!box.Destroyed)
+        if (!food.Destroyed)
         {
-            if (CheckCollision(*Player, box))
+            if (CheckCollision(*Player, food))
             {
-                if (!box.IsSolid)
-                    box.Destroyed = true;
+                    food.Destroyed = true;
             }
         }
     }
 }  
-void Game::CheckMoveColissions(GameObject * object)
+void Game::CheckMoveColissions(MoveableObject * object)
 {
     for (int i = 0; i < 4; i++)
     {
@@ -158,10 +143,9 @@ void Game::ProcessInput(float dt)
 {   
    if (this->State == GAME_ACTIVE)
    {
-        //TODO: convert to a function
         CheckMoveColissions(Player);
 
-        float velocity = PLAYER_VELOCITY * dt;
+        float velocity = Player->Velocity * dt;
         // move playerboard
         if (this->Keys[GLFW_KEY_A])
         {
@@ -181,7 +165,7 @@ void Game::ProcessInput(float dt)
             if ((Player->Position.y <= this->Height - Player->Size.y) && ((Player->CurrentCollision)[3] == 0))
                 Player->Position.y += velocity;
         }
-         if (this->Keys[GLFW_KEY_W])
+        if (this->Keys[GLFW_KEY_W])
         {
             Player->Rotation = 270.0f;
             if ((Player->Position.y >= 0.0f) && ((Player->CurrentCollision)[2] == 0))
@@ -192,20 +176,17 @@ void Game::ProcessInput(float dt)
 
 void Game::Render()
 {
-    if(this->State == GAME_ACTIVE)
+    if(State == GAME_WIN || State == GAME_LOSE)
     {
-        if(GameOverFlag == 1)
-        {
-            Renderer->DrawSprite(ResourceManager::GetTexture("background"), glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height), 0.0f, glm::vec3(1.0f));
-        }
-        //Renderer->DrawSprite(ResourceManager::GetTexture("face"), glm::vec2(200.0f, 200.0f), glm::vec2(300.0f, 400.0f), 10.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-        this->Levels[this->Level].Draw(*Renderer);
-        //this->Levels[this->Level].Draw(*Renderer);
-        Player->Draw(*Renderer);
-        Ghosts[0]->Draw(*Renderer);
-        Ghosts[1]->Draw(*Renderer);
-        Ghosts[2]->Draw(*Renderer);
-        //std::cout<< Player->Position.x << std::endl;
-        //std::cout<< Player->Position.y << std::endl;
+        Renderer->DrawSprite(ResourceManager::GetTexture("background"), glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height), 0.0f, glm::vec3(1.0f));
     }
+    this->Levels[this->Level].Draw(*Renderer);
+    if(this->State == GAME_ACTIVE)
+        Player->Draw(*Renderer);
+    for (auto ghost : Ghosts)
+        ghost->Draw(*Renderer);
 }
+
+GameLevel Game::getGameLevel(unsigned int l)
+{return Levels[l];}
+
