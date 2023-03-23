@@ -24,6 +24,8 @@ static void glfw_error_callback(int error, const char* description);
 
 Game Breakout(SCR_WIDTH, SCR_HEIGHT);
 
+static struct GameEvents_TAG GameEvents = {false, GHOST_VELOCITY, PLAYER_VELOCITY};
+
 // Main code
 int main(int, char**)
 {
@@ -94,7 +96,6 @@ int main(int, char**)
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Our state
-    bool show_Game = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     /***********IMGUI***********************/
     //main loop
@@ -105,23 +106,19 @@ int main(int, char**)
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_Game)
-        {
-            ImGui::Begin("Pacman Game", &show_Game);   
-            ImGui::Text("Pacman Game");     
-            ImGui::End();                   
-        }
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+        //Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
             std::stringstream ss;
             ss << "Food: " << (Breakout.getGameLevel(0)).getRemainingFood() << "/" << (Breakout.getGameLevel(0)).getFoodAmount();
             std::string str = ss.str();
             const char * c = str.c_str();
             ImGui::Begin("Pacman Menu");                          // Create a window called "Hello, world!" and append into it.
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Game", &show_Game);                     // Edit bools storing our window open/close state
+            ImGui::Text("This is some useful text.");             // Display some text (you can use a format strings too)
+            ImGui::Checkbox("Go Through Walls", &GameEvents._goThroughWalls);                  // Edit bools storing our window open/close state
+            ImGui::SliderFloat("ghosts speed", &GameEvents._ghostsVelocity, 0.0f, 300.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderFloat("pacman speed", &GameEvents._pacmanVelocity, 0.0f, 500.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+
+
             ImGui::ColorEdit3("color", (float*)&clear_color); // Edit 3 floats representing a color
             ImGui::Text("Your level:");               // Display some text (you can use a format strings too)
             ImGui::Text(c);               // Display some text (you can use a format strings too)
@@ -153,22 +150,16 @@ int main(int, char**)
         lastFrame = currentFrame;
         glfwPollEvents();
         processInput(window);
-        Breakout.ProcessInput(deltaTime);
         Breakout.Update(deltaTime);
-        //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        //glClear(GL_COLOR_BUFFER_BIT);
+        Breakout.ProcessInput(deltaTime);
         Breakout.Render();
         if (Breakout.State == GAME_LOSE)
             RenderTextMain("GAME OVER");
-        if (Breakout.State == GAME_WIN)
+        else if (Breakout.State == GAME_WIN)
             RenderTextMain("You Win");
-            
+    
         glfwSwapBuffers(window);
     }
-#ifdef __EMSCRIPTEN__
-    EMSCRIPTEN_MAINLOOP_END;
-#endif
-
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -211,4 +202,13 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+}
+
+extern struct GameEvents_TAG getGameEvents(void)
+{
+    struct GameEvents_TAG gameEvents;
+    gameEvents._goThroughWalls = GameEvents._goThroughWalls;
+    gameEvents._ghostsVelocity = GameEvents._ghostsVelocity;
+    gameEvents._pacmanVelocity = GameEvents._pacmanVelocity;
+    return gameEvents;
 }

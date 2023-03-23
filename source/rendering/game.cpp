@@ -11,6 +11,9 @@
 #include "../../include/rendering/sprite_renderer.h"
 #include "../../include/rendering/game_object.h"
 #include "../../include/rendering/game_level.h"
+#ifndef GAME_SETTINGS_H
+    #include "../../include/rendering/game_settings.h"
+#endif
 #include <vector>
 
 // Game-related State data
@@ -20,6 +23,8 @@ MoveableObject                  *Ghost_1;
 MoveableObject                  *Ghost_2; 
 MoveableObject                  *Ghost_3; 
 std::vector<MoveableObject*>     Ghosts;
+static struct GameEvents_TAG gameEvents;
+
 static void loadTextures()
 {
     ResourceManager::LoadTexture("../../resources/background.jpg", false, "background");
@@ -77,11 +82,15 @@ void Game::Init()
 
 void Game::Update(float dt)
 {
+    gameEvents = getGameEvents();
+    Player->setVelocity(gameEvents._pacmanVelocity);
+    for (auto ghost : Ghosts)
+         ghost->setVelocity(gameEvents._ghostsVelocity);
+
     //delete the Food when you make a collision
     this->DoCollisions();
     //update state of possibility of movement for each ghost
     //check if player didn't touch the ghost
-    //move ghost
     for (auto ghost : Ghosts)
     {
         CheckMoveColissions(ghost);
@@ -141,36 +150,40 @@ void Game::CheckMoveColissions(MoveableObject * object)
 
 void Game::ProcessInput(float dt)
 {   
-   if (this->State == GAME_ACTIVE)
-   {
+    if(gameEvents._goThroughWalls == false)
         CheckMoveColissions(Player);
-
-        float velocity = Player->Velocity * dt;
-        // move playerboard
-        if (this->Keys[GLFW_KEY_A])
+    else
+    {
+        for(auto collision : Player->CurrentCollision)
         {
-            Player->Rotation = 0.0f;
-            if ((Player->Position.x) >= 0.0f && ((Player->CurrentCollision)[1] == 0))
-                Player->Position.x -= velocity;
+            collision = false;
         }
-        if (this->Keys[GLFW_KEY_D])
-        {
-            Player->Rotation = 0.0f;
-            if ((Player->Position.x <= this->Width - Player->Size.x) && ((Player->CurrentCollision)[0] == 0)) 
-                Player->Position.x +=velocity;
-        }
-        if (this->Keys[GLFW_KEY_S])
-        {
-            Player->Rotation = 90.0f;
-            if ((Player->Position.y <= this->Height - Player->Size.y) && ((Player->CurrentCollision)[3] == 0))
-                Player->Position.y += velocity;
-        }
-        if (this->Keys[GLFW_KEY_W])
-        {
-            Player->Rotation = 270.0f;
-            if ((Player->Position.y >= 0.0f) && ((Player->CurrentCollision)[2] == 0))
-                Player->Position.y -= velocity;
-        }
+    }
+    float velocity = Player->Velocity * dt;
+    // move playerboard
+    if (this->Keys[GLFW_KEY_A])
+    {
+        Player->Rotation = 0.0f;
+        if ((Player->Position.x) >= 0.0f && ((Player->CurrentCollision)[1] == 0))
+            Player->Position.x -= velocity;
+    }
+    if (this->Keys[GLFW_KEY_D])
+    {
+        Player->Rotation = 0.0f;
+        if ((Player->Position.x <= this->Width - Player->Size.x) && ((Player->CurrentCollision)[0] == 0)) 
+            Player->Position.x +=velocity;
+    }
+    if (this->Keys[GLFW_KEY_S])
+    {
+        Player->Rotation = 90.0f;
+        if ((Player->Position.y <= this->Height - Player->Size.y) && ((Player->CurrentCollision)[3] == 0))
+            Player->Position.y += velocity;
+    }
+    if (this->Keys[GLFW_KEY_W])
+    {
+        Player->Rotation = 270.0f;
+        if ((Player->Position.y >= 0.0f) && ((Player->CurrentCollision)[2] == 0))
+            Player->Position.y -= velocity;
     }
 }
 

@@ -1,6 +1,8 @@
 #include <map>
 #include "../../include/rendering/text.h"
-#include "../../include/rendering/game_settings.h"
+#ifndef GAME_SETTINGS_H
+    #include "../../include/rendering/game_settings.h"
+#endif
 
 
 std::map<GLchar, Character> Characters;

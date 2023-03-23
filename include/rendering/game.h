@@ -12,7 +12,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "game_level.h"
-#include "game_settings.h"
+#ifndef GAME_SETTINGS_H
+    #include "game_settings.h"
+#endif
 
 // Represents the current state of the game
 enum GameState {

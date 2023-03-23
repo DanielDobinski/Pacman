@@ -23,6 +23,12 @@ void GameObject::Draw(SpriteRenderer &renderer)
 {
     renderer.DrawSprite(this->Sprite, this->Position, this->Size, this->Rotation, this->Color);
 }
+
+void MoveableObject::setVelocity(float v)
+{
+    Velocity = v;
+}
+
 //one is movable, two is brick
 bool CheckCollision(GameObject &one, GameObject &two) // AABB - AABB collision
 {
@@ -110,3 +116,4 @@ void MoveableObject::MoveRandom(float velocity)
     else
         {this->Direction = rand() % 4;MoveRandom(velocity);}
 }
+

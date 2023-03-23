@@ -6,6 +6,7 @@
 ** Creative Commons, either version 4 of the License, or (at your
 ** option) any later version.
 ******************************************************************/
+#pragma once
 #ifndef GAMEOBJECT_H
 #define GAMEOBJECT_H
 
@@ -15,7 +16,9 @@
 
 #include "../../include/rendering/texture.h"
 #include "../../include/rendering/sprite_renderer.h"
-#include "../../include/rendering/game_settings.h"
+#ifndef GAME_SETTINGS_H
+    #include "../../include/rendering/game_settings.h"
+#endif
 
 // Container object for holding all state relevant for a single
 // game object entity. Each object in the game likely needs the
@@ -46,6 +49,7 @@ public:
         float velocity = PLAYER_VELOCITY, std::vector<bool> CurrentCollision = {false, false, false, false},
         int Direction = 0, int MoveCount = 0);
 
+    void setVelocity(float v);
     void MoveRandom(float velocity);
 };
 
