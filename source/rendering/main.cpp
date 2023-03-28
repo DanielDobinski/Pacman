@@ -24,7 +24,7 @@ static void glfw_error_callback(int error, const char* description);
 
 Game Breakout(SCR_WIDTH, SCR_HEIGHT);
 
-static struct GameEvents_TAG GameEvents = {false, GHOST_VELOCITY, PLAYER_VELOCITY};
+static struct GameEvents_TAG GameEvents = {false, false, GHOST_VELOCITY, PLAYER_VELOCITY};
 
 // Main code
 int main(int, char**)
@@ -114,7 +114,8 @@ int main(int, char**)
             const char * c = str.c_str();
             ImGui::Begin("Pacman Menu");                          // Create a window called "Hello, world!" and append into it.
             ImGui::Text("This is some useful text.");             // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Go Through Walls", &GameEvents._goThroughWalls);                  // Edit bools storing our window open/close state
+            ImGui::Checkbox("Go Through Walls", &GameEvents._goThroughWalls);                         // Edit bools storing our window open/close state
+            ImGui::Checkbox("Activate Particles", &GameEvents._particles);                            // Edit bools storing our window open/close state
             ImGui::SliderFloat("ghosts speed", &GameEvents._ghostsVelocity, 0.0f, 300.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::SliderFloat("pacman speed", &GameEvents._pacmanVelocity, 0.0f, 500.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
 
@@ -207,6 +208,7 @@ static void glfw_error_callback(int error, const char* description)
 extern struct GameEvents_TAG getGameEvents(void)
 {
     struct GameEvents_TAG gameEvents;
+    gameEvents._particles = GameEvents._particles;
     gameEvents._goThroughWalls = GameEvents._goThroughWalls;
     gameEvents._ghostsVelocity = GameEvents._ghostsVelocity;
     gameEvents._pacmanVelocity = GameEvents._pacmanVelocity;

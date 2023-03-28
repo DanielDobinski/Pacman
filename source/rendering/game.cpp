@@ -11,6 +11,7 @@
 #include "../../include/rendering/sprite_renderer.h"
 #include "../../include/rendering/game_object.h"
 #include "../../include/rendering/game_level.h"
+#include "../../include/rendering/particle.h"
 #ifndef GAME_SETTINGS_H
     #include "../../include/rendering/game_settings.h"
 #endif
@@ -22,6 +23,7 @@ MoveableObject                  *Player;
 MoveableObject                  *Ghost_1;     
 MoveableObject                  *Ghost_2; 
 MoveableObject                  *Ghost_3; 
+ParticleGenerator               *Particles; 
 std::vector<MoveableObject*>     Ghosts;
 static struct GameEvents_TAG gameEvents;
 
@@ -35,6 +37,7 @@ static void loadTextures()
     ResourceManager::LoadTexture("../../resources/ghost_blue.png", false, "ghost_blue");
     ResourceManager::LoadTexture("../../resources/ghost_yellow.png", false, "ghost_yellow");
     ResourceManager::LoadTexture("../../resources/coke.jpg", false, "food");
+    ResourceManager::LoadTexture("../../resources/particle.png", true, "particle"); 
 }
 static void loadGhosts(Game * gamePtr)
 {
@@ -69,6 +72,7 @@ Game::~Game()
 void Game::Init()
 {
     ResourceManager::LoadShader("../../include/rendering/shader.vs", "../../include/rendering/shader.fs", nullptr, "sprite");
+    ResourceManager::LoadShader("../../resources/particle.vs", "../../resources/particle.fs", nullptr, "particle");
     // configure shaders
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->Width), 
     static_cast<float>(this->Height), 0.0f, -1.0f, 1.0f);
@@ -76,8 +80,16 @@ void Game::Init()
     ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
     ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
     Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
+
     loadTextures();
     loadGhosts(this);
+
+    Particles = new ParticleGenerator(
+        ResourceManager::GetShader("particle"), 
+        ResourceManager::GetTexture("particle"), 
+        500
+    );
+    ResourceManager::GetShader("particle").Use().SetMatrix4("projection", projection);
 }
 
 void Game::Update(float dt)
@@ -104,6 +116,8 @@ void Game::Update(float dt)
     {
         this->State = GAME_WIN;
     }
+
+    Particles->Update(dt, *Player, 2, glm::vec2(Player->Size / 2.0f));
 }
 
 void Game::DoCollisions()
@@ -195,7 +209,11 @@ void Game::Render()
     }
     this->Levels[this->Level].Draw(*Renderer);
     if(this->State == GAME_ACTIVE)
+    {
+        if(gameEvents._particles == true)
+            Particles->Draw();
         Player->Draw(*Renderer);
+    }
     for (auto ghost : Ghosts)
         ghost->Draw(*Renderer);
 }

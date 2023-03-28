@@ -53,5 +53,6 @@ target_sources(
 	${CMAKE_SOURCE_DIR}/source/rendering/game_level.cpp
 	${CMAKE_SOURCE_DIR}/source/rendering/text.cpp
 	${CMAKE_SOURCE_DIR}/source/rendering/game_settings.cpp
+	${CMAKE_SOURCE_DIR}/source/rendering/particle.cpp
 )
 

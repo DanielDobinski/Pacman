@@ -13,6 +13,7 @@ const float GHOST_VELOCITY(100.0f);
 
 struct GameEvents_TAG
 {
+    bool _particles;
     bool _goThroughWalls;
     float _ghostsVelocity;
     float _pacmanVelocity;
