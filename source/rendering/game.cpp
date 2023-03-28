@@ -6,6 +6,11 @@
 ** Creative Commons, either version 4 of the License, or (at your
 ** option) any later version.
 ******************************************************************/
+#include <algorithm>
+#include <vector>
+#include <irrKlang.h>
+using namespace irrklang;
+#pragma comment(lib, "irrKlang.lib") 
 #include "../../include/rendering/game.h"
 #include "../../include/rendering/resource_manager.h"
 #include "../../include/rendering/sprite_renderer.h"
@@ -13,12 +18,14 @@
 #include "../../include/rendering/game_level.h"
 #include "../../include/rendering/particle.h"
 #include "../../include/rendering/post_processor.h"
+
+
 #ifndef GAME_SETTINGS_H
     #include "../../include/rendering/game_settings.h"
 #endif
-#include <vector>
 
 // Game-related State data
+ISoundEngine *SoundEngine   =   createIrrKlangDevice();
 SpriteRenderer                  *Renderer;
 MoveableObject                  *Player;
 MoveableObject                  *Ghost_1;     
@@ -30,36 +37,9 @@ PostProcessor                   *Effects;
 static float                            ShakeTime = 0.0f;  
 static struct GameEvents_TAG gameEvents;
 
-static void loadTextures()
-{
-    ResourceManager::LoadTexture("../../resources/background.jpg", false, "background");
-    ResourceManager::LoadTexture("../../resources/block.png", false, "block");
-    ResourceManager::LoadTexture("../../resources/block_solid.png", false, "block_solid");
-    ResourceManager::LoadTexture("../../resources/pacman.png", false, "pacman");
-    ResourceManager::LoadTexture("../../resources/ghost_red.jpg", false, "ghost_red");
-    ResourceManager::LoadTexture("../../resources/ghost_blue.png", false, "ghost_blue");
-    ResourceManager::LoadTexture("../../resources/ghost_yellow.png", false, "ghost_yellow");
-    ResourceManager::LoadTexture("../../resources/coke.jpg", false, "food");
-    ResourceManager::LoadTexture("../../resources/particle.png", true, "particle"); 
-}
-static void loadGhosts(Game * gamePtr)
-{
-    GameLevel one; one.Load("../../resources/one.lvl", gamePtr->Width, gamePtr->Height);
-    gamePtr->Levels.push_back(one);
-    gamePtr->Level = 0;
-    //game objects
-    glm::vec2 playerPos = glm::vec2(gamePtr->Width / 2.0f - PLAYER_SIZE.x / 2.0f, gamePtr->Height / 2.0f - PLAYER_SIZE.y / 2.0f);
-    glm::vec2 ghostPos1 = glm::vec2(gamePtr->Width / 3.0f - PLAYER_SIZE.x / 3.0f, gamePtr->Height / 3.0f - PLAYER_SIZE.y / 3.0f);
-    glm::vec2 ghostPos2 = glm::vec2(gamePtr->Width / 3.0f - PLAYER_SIZE.x / 3.0f, gamePtr->Height / 3.0f - PLAYER_SIZE.y / 3.0f);
-    glm::vec2 ghostPos3 = glm::vec2(gamePtr->Width / 3.0f - PLAYER_SIZE.x / 2.0f, gamePtr->Height / 5.0f - PLAYER_SIZE.y / 2.0f);
-    Player = new MoveableObject(playerPos, PLAYER_SIZE, ResourceManager::GetTexture("pacman"), glm::vec3(1.0f), PLAYER_VELOCITY); 
-    Ghost_1 = new MoveableObject(ghostPos1, PLAYER_SIZE, ResourceManager::GetTexture("ghost_red"), glm::vec3(1.0f), GHOST_VELOCITY);
-    Ghost_2 = new MoveableObject(ghostPos2, PLAYER_SIZE, ResourceManager::GetTexture("ghost_blue"), glm::vec3(1.0f), GHOST_VELOCITY);
-    Ghost_3 = new MoveableObject(ghostPos3, PLAYER_SIZE, ResourceManager::GetTexture("ghost_yellow"), glm::vec3(1.0f), GHOST_VELOCITY);
-    Ghosts.push_back(Ghost_1);
-    Ghosts.push_back(Ghost_2);
-    Ghosts.push_back(Ghost_3);
-}
+static void loadTextures();
+static void loadGhosts(Game * gamePtr);
+
 Game::Game(unsigned int width, unsigned int height) 
     : State(GAME_ACTIVE), Keys(), Width(width), Height(height) {}
 
@@ -70,6 +50,9 @@ Game::~Game()
     delete Ghost_1;
     delete Ghost_2;
     delete Ghost_3;
+    delete Particles;
+    delete Effects;
+    SoundEngine->drop();
 }
 
 void Game::Init()
@@ -91,6 +74,7 @@ void Game::Init()
     Particles = new ParticleGenerator(ResourceManager::GetShader("particle"), ResourceManager::GetTexture("particle"), 500);
     Effects = new PostProcessor(ResourceManager::GetShader("postprocessing"), this->Width, this->Height);
     ResourceManager::GetShader("particle").Use().SetMatrix4("projection", projection);
+    SoundEngine->play2D("../../resources/breakout.mp3", true);
 }
 
 void Game::Update(float dt)
@@ -108,13 +92,19 @@ void Game::Update(float dt)
     {
         CheckMoveColissions(ghost);
         if(CheckCollision(*Player, *ghost))
+        {
+            if(State != GAME_LOSE)
+                SoundEngine->play2D("../../resources/gameover.mp3", false);
             this->State = GAME_LOSE;
+        }
         ghost->MoveRandom(ghost->Velocity * dt);
     }
 
     this->Food = (this->getGameLevel(0)).getRemainingFood();
     if(Food == 0)
     {
+        if(State != GAME_WIN)
+            SoundEngine->play2D("../../resources/youwin.mp3", false);
         this->State = GAME_WIN;
     }
 
@@ -132,6 +122,7 @@ void Game::DoCollisions()
             if (CheckCollision(*Player, food))
             {
                     food.Destroyed = true;
+                    SoundEngine->play2D("../../resources/solid.wav", false);
             }
         }
     }
@@ -244,3 +235,34 @@ void Game::CheckMoveColissions(MoveableObject * object)
 GameLevel Game::getGameLevel(unsigned int l)
 {return Levels[l];}
 
+static void loadTextures()
+{
+    ResourceManager::LoadTexture("../../resources/background.jpg", false, "background");
+    ResourceManager::LoadTexture("../../resources/block.png", false, "block");
+    ResourceManager::LoadTexture("../../resources/block_solid.png", false, "block_solid");
+    ResourceManager::LoadTexture("../../resources/pacman.png", false, "pacman");
+    ResourceManager::LoadTexture("../../resources/ghost_red.jpg", false, "ghost_red");
+    ResourceManager::LoadTexture("../../resources/ghost_blue.png", false, "ghost_blue");
+    ResourceManager::LoadTexture("../../resources/ghost_yellow.png", false, "ghost_yellow");
+    ResourceManager::LoadTexture("../../resources/coke.jpg", false, "food");
+    ResourceManager::LoadTexture("../../resources/particle.png", true, "particle"); 
+}
+
+static void loadGhosts(Game * gamePtr)
+{
+    GameLevel one; one.Load("../../resources/one.lvl", gamePtr->Width, gamePtr->Height);
+    gamePtr->Levels.push_back(one);
+    gamePtr->Level = 0;
+    //game objects
+    glm::vec2 playerPos = glm::vec2(gamePtr->Width / 2.0f - PLAYER_SIZE.x / 2.0f, gamePtr->Height / 2.0f - PLAYER_SIZE.y / 2.0f);
+    glm::vec2 ghostPos1 = glm::vec2(gamePtr->Width / 3.0f - PLAYER_SIZE.x / 3.0f, gamePtr->Height / 3.0f - PLAYER_SIZE.y / 3.0f);
+    glm::vec2 ghostPos2 = glm::vec2(gamePtr->Width / 3.0f - PLAYER_SIZE.x / 3.0f, gamePtr->Height / 3.0f - PLAYER_SIZE.y / 3.0f);
+    glm::vec2 ghostPos3 = glm::vec2(gamePtr->Width / 3.0f - PLAYER_SIZE.x / 2.0f, gamePtr->Height / 5.0f - PLAYER_SIZE.y / 2.0f);
+    Player = new MoveableObject(playerPos, PLAYER_SIZE, ResourceManager::GetTexture("pacman"), glm::vec3(1.0f), PLAYER_VELOCITY); 
+    Ghost_1 = new MoveableObject(ghostPos1, PLAYER_SIZE, ResourceManager::GetTexture("ghost_red"), glm::vec3(1.0f), GHOST_VELOCITY);
+    Ghost_2 = new MoveableObject(ghostPos2, PLAYER_SIZE, ResourceManager::GetTexture("ghost_blue"), glm::vec3(1.0f), GHOST_VELOCITY);
+    Ghost_3 = new MoveableObject(ghostPos3, PLAYER_SIZE, ResourceManager::GetTexture("ghost_yellow"), glm::vec3(1.0f), GHOST_VELOCITY);
+    Ghosts.push_back(Ghost_1);
+    Ghosts.push_back(Ghost_2);
+    Ghosts.push_back(Ghost_3);
+}

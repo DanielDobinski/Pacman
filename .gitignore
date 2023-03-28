@@ -6,6 +6,7 @@
 vcpkg_installed/
 vcpkg
 build
+irrKlang
 
 # User-specific files
 build/
