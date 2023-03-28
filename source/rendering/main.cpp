@@ -24,7 +24,7 @@ static void glfw_error_callback(int error, const char* description);
 
 Game Breakout(SCR_WIDTH, SCR_HEIGHT);
 
-static struct GameEvents_TAG GameEvents = {false, false, GHOST_VELOCITY, PLAYER_VELOCITY};
+static struct GameEvents_TAG GameEvents = {false, false, false, false, false, GHOST_VELOCITY, PLAYER_VELOCITY};
 
 // Main code
 int main(int, char**)
@@ -116,6 +116,9 @@ int main(int, char**)
             ImGui::Text("This is some useful text.");             // Display some text (you can use a format strings too)
             ImGui::Checkbox("Go Through Walls", &GameEvents._goThroughWalls);                         // Edit bools storing our window open/close state
             ImGui::Checkbox("Activate Particles", &GameEvents._particles);                            // Edit bools storing our window open/close state
+            ImGui::Checkbox("Activate shake", &GameEvents._shake);                            // Edit bools storing our window open/close state
+            ImGui::Checkbox("Activate confuse", &GameEvents._confuse);                            // Edit bools storing our window open/close state
+            ImGui::Checkbox("Activate chaos", &GameEvents._chaos);                            // Edit bools storing our window open/close state
             ImGui::SliderFloat("ghosts speed", &GameEvents._ghostsVelocity, 0.0f, 300.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::SliderFloat("pacman speed", &GameEvents._pacmanVelocity, 0.0f, 500.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
 
@@ -209,6 +212,9 @@ extern struct GameEvents_TAG getGameEvents(void)
 {
     struct GameEvents_TAG gameEvents;
     gameEvents._particles = GameEvents._particles;
+    gameEvents._shake = GameEvents._shake;
+    gameEvents._confuse = GameEvents._confuse;
+    gameEvents._chaos = GameEvents._chaos;
     gameEvents._goThroughWalls = GameEvents._goThroughWalls;
     gameEvents._ghostsVelocity = GameEvents._ghostsVelocity;
     gameEvents._pacmanVelocity = GameEvents._pacmanVelocity;

@@ -12,6 +12,7 @@
 #include "../../include/rendering/game_object.h"
 #include "../../include/rendering/game_level.h"
 #include "../../include/rendering/particle.h"
+#include "../../include/rendering/post_processor.h"
 #ifndef GAME_SETTINGS_H
     #include "../../include/rendering/game_settings.h"
 #endif
@@ -25,6 +26,8 @@ MoveableObject                  *Ghost_2;
 MoveableObject                  *Ghost_3; 
 ParticleGenerator               *Particles; 
 std::vector<MoveableObject*>     Ghosts;
+PostProcessor                   *Effects;
+static float                            ShakeTime = 0.0f;  
 static struct GameEvents_TAG gameEvents;
 
 static void loadTextures()
@@ -73,6 +76,7 @@ void Game::Init()
 {
     ResourceManager::LoadShader("../../include/rendering/shader.vs", "../../include/rendering/shader.fs", nullptr, "sprite");
     ResourceManager::LoadShader("../../resources/particle.vs", "../../resources/particle.fs", nullptr, "particle");
+    ResourceManager::LoadShader("../../resources/post_processing.vs", "../../resources/post_processing.fs", nullptr, "postprocessing");
     // configure shaders
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->Width), 
     static_cast<float>(this->Height), 0.0f, -1.0f, 1.0f);
@@ -84,11 +88,8 @@ void Game::Init()
     loadTextures();
     loadGhosts(this);
 
-    Particles = new ParticleGenerator(
-        ResourceManager::GetShader("particle"), 
-        ResourceManager::GetTexture("particle"), 
-        500
-    );
+    Particles = new ParticleGenerator(ResourceManager::GetShader("particle"), ResourceManager::GetTexture("particle"), 500);
+    Effects = new PostProcessor(ResourceManager::GetShader("postprocessing"), this->Width, this->Height);
     ResourceManager::GetShader("particle").Use().SetMatrix4("projection", projection);
 }
 
@@ -135,32 +136,6 @@ void Game::DoCollisions()
         }
     }
 }  
-void Game::CheckMoveColissions(MoveableObject * object)
-{
-    for (int i = 0; i < 4; i++)
-    {
-        (object->CurrentCollision)[i] = false;
-    }
-    for (GameObject &box : this->Levels[this->Level].Bricks)
-        {
-            if (CheckCollisionRight(*object, box))
-            {
-                (object->CurrentCollision)[0] = true;
-            }
-            if (CheckCollisionLeft(*object, box))
-            {
-                (object->CurrentCollision)[1] = true;
-            }
-            if (CheckCollisionUp(*object, box))
-            {
-                (object->CurrentCollision)[2] = true;
-            }
-            if (CheckCollisionDown(*object, box))
-            {
-                (object->CurrentCollision)[3] = true;
-            }
-        }
-}
 
 void Game::ProcessInput(float dt)
 {   
@@ -173,6 +148,23 @@ void Game::ProcessInput(float dt)
             collision = false;
         }
     }
+    std::cout << gameEvents._shake << std::endl;
+    if(gameEvents._shake == true)
+    {
+        Effects->Shake = true;
+    } else
+        Effects->Shake = false;
+    if(gameEvents._confuse == true)
+    {
+        Effects->Confuse = true;
+    } else
+        Effects->Confuse = false;
+    if(gameEvents._chaos == true)
+    {
+        Effects->Chaos = true;
+    } else
+        Effects->Chaos = false;
+
     float velocity = Player->Velocity * dt;
     // move playerboard
     if (this->Keys[GLFW_KEY_A])
@@ -203,19 +195,50 @@ void Game::ProcessInput(float dt)
 
 void Game::Render()
 {
-    if(State == GAME_WIN || State == GAME_LOSE)
+    Effects->BeginRender();
+        if(State == GAME_WIN || State == GAME_LOSE)
+        {
+            Renderer->DrawSprite(ResourceManager::GetTexture("background"), glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height), 0.0f, glm::vec3(1.0f));
+        }
+        this->Levels[this->Level].Draw(*Renderer);
+        if(this->State == GAME_ACTIVE)
+        {
+            if(gameEvents._particles == true)
+                Particles->Draw();
+            Player->Draw(*Renderer);
+        }
+        for (auto ghost : Ghosts)
+            ghost->Draw(*Renderer);
+
+    Effects->EndRender();
+    Effects->Render(glfwGetTime());
+}
+
+void Game::CheckMoveColissions(MoveableObject * object)
+{
+    for (int i = 0; i < 4; i++)
     {
-        Renderer->DrawSprite(ResourceManager::GetTexture("background"), glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height), 0.0f, glm::vec3(1.0f));
+        (object->CurrentCollision)[i] = false;
     }
-    this->Levels[this->Level].Draw(*Renderer);
-    if(this->State == GAME_ACTIVE)
-    {
-        if(gameEvents._particles == true)
-            Particles->Draw();
-        Player->Draw(*Renderer);
-    }
-    for (auto ghost : Ghosts)
-        ghost->Draw(*Renderer);
+    for (GameObject &box : this->Levels[this->Level].Bricks)
+        {
+            if (CheckCollisionRight(*object, box))
+            {
+                (object->CurrentCollision)[0] = true;
+            }
+            if (CheckCollisionLeft(*object, box))
+            {
+                (object->CurrentCollision)[1] = true;
+            }
+            if (CheckCollisionUp(*object, box))
+            {
+                (object->CurrentCollision)[2] = true;
+            }
+            if (CheckCollisionDown(*object, box))
+            {
+                (object->CurrentCollision)[3] = true;
+            }
+        }
 }
 
 GameLevel Game::getGameLevel(unsigned int l)
