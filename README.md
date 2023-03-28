@@ -8,6 +8,14 @@
 
 [**OpenGL**](https://www.opengl.org/) (Open Graphics Library) is a cross-language, cross-platform application programming interface (API) for rendering 2D and 3D vector graphics. The API is typically used to interact with a graphics processing unit (GPU), to achieve hardware-accelerated rendering.
 
+# Game Play
+![image](https://github.com/DanielDobinski/Pacman/blob/main/game_play/game2.PNG)
+![image](https://github.com/DanielDobinski/Pacman/blob/main/game_play/game1.PNG)
+[![YouTube](https://github.com/DanielDobinski/Pacman/blob/main/game_play/gameYT.png)](https://youtu.be/ZynEebJM1h8))
+
+
+
+
 ## Install and Configure
 ### On Windows
 Install dependencies using [vcpkg - (VC++ Package Manager)](https://vcpkg.io/en/index.html) 
