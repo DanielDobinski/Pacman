@@ -22,11 +22,13 @@ Install dependencies using [vcpkg - (VC++ Package Manager)](https://vcpkg.io/en/
 # Install imgui dependencies using vcpkg manifest (vcpkg.json)
 > .\vcpkg\vcpkg install 
 
-# Compile and Run (or run  .\win-build.bat)
+# Compile and Run
 > cmake . -B build/
 > cmake --build build
 > build\Debug\ImGui-GLFW-OpenGL3.exe
 
+#download and place Irrklang for sound from [here](https://www.ambiera.com/irrklang/downloads.html)
+#Place irrklang.dll and ikpMP3.dll in the same place as exe file is created
 ```
 
 ## Credits
@@ -35,4 +37,5 @@ Install dependencies using [vcpkg - (VC++ Package Manager)](https://vcpkg.io/en/
 - Dear ImGui - https://github.com/ocornut/imgui  
 - GLFW - https://www.glfw.org/  
 - OpenGL - https://www.opengl.org/  
+- LearnOpenGL - https://learnopengl.com/ - most of it created on the Arcade Game Tutorial
 
