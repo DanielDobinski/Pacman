@@ -1,11 +1,4 @@
-/*******************************************************************
-** This code is part of Breakout.
-**
-** Breakout is free software: you can redistribute it and/or modify
-** it under the terms of the CC BY 4.0 license as published by
-** Creative Commons, either version 4 of the License, or (at your
-** option) any later version.
-******************************************************************/
+
 #include <algorithm>
 #include <vector>
 #include <irrKlang.h>
@@ -34,7 +27,6 @@ MoveableObject                  *Ghost_3;
 ParticleGenerator               *Particles; 
 std::vector<MoveableObject*>     Ghosts;
 PostProcessor                   *Effects;
-static float                            ShakeTime = 0.0f;  
 static struct GameEvents_TAG gameEvents;
 
 static void loadTextures();
@@ -63,14 +55,11 @@ void Game::Init()
     // configure shaders
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->Width), 
     static_cast<float>(this->Height), 0.0f, -1.0f, 1.0f);
-
     ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
     ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
-    Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
-
     loadTextures();
     loadGhosts(this);
-
+    Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
     Particles = new ParticleGenerator(ResourceManager::GetShader("particle"), ResourceManager::GetTexture("particle"), 500);
     Effects = new PostProcessor(ResourceManager::GetShader("postprocessing"), this->Width, this->Height);
     ResourceManager::GetShader("particle").Use().SetMatrix4("projection", projection);
@@ -83,8 +72,8 @@ void Game::Update(float dt)
     Player->setVelocity(gameEvents._pacmanVelocity);
     for (auto ghost : Ghosts)
          ghost->setVelocity(gameEvents._ghostsVelocity);
-
     //delete the Food when you make a collision
+
     this->DoCollisions();
     //update state of possibility of movement for each ghost
     //check if player didn't touch the ghost
@@ -139,7 +128,6 @@ void Game::ProcessInput(float dt)
             collision = false;
         }
     }
-    std::cout << gameEvents._shake << std::endl;
     if(gameEvents._shake == true)
     {
         Effects->Shake = true;

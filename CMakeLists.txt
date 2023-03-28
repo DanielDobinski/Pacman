@@ -28,9 +28,6 @@ target_include_directories(
 	ImGui-GLFW-OpenGL3
   	PRIVATE 
 	${CMAKE_SOURCE_DIR}/
-	   ${CMAKE_SOURCE_DIR}/irrKlang/lib
-	   ${CMAKE_SOURCE_DIR}/irrKlang/lib/Winx64-visualStudio
-	   ${CMAKE_SOURCE_DIR}/irrKlang/bin/winx64-visualStudio
 	   ${CMAKE_SOURCE_DIR}/irrKlang/include
         ${CMAKE_SOURCE_DIR}/implot
         ${CMAKE_SOURCE_DIR}/imgui-knobs
