@@ -11,7 +11,7 @@
 # Game Play
 ![image](https://github.com/DanielDobinski/Pacman/blob/main/game_play/game2.PNG)
 ![image](https://github.com/DanielDobinski/Pacman/blob/main/game_play/game1.PNG)
-[![YouTube](https://github.com/DanielDobinski/Pacman/blob/main/game_play/gameYT.png)](https://youtu.be/ZynEebJM1h8))
+[![YouTube](https://github.com/DanielDobinski/Pacman/blob/main/game_play/gameYT.png)](https://youtu.be/ZynEebJM1h8)
 
 
 
