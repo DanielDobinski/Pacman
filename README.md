@@ -27,7 +27,7 @@ Install dependencies using [vcpkg - (VC++ Package Manager)](https://vcpkg.io/en/
 # Run the bootstrap script for vcpkg
 > .\vcpkg\bootstrap-vcpkg.bat
 
-# Install imgui dependencies using vcpkg manifest (vcpkg.json)
+# Install dependencies using vcpkg manifest (vcpkg.json)
 > .\vcpkg\vcpkg install 
 
 # Compile and Run
